@@ -3,6 +3,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <iostream>
 
 #include "linux_parser.h"
 
@@ -10,6 +11,15 @@ using std::stof;
 using std::string;
 using std::to_string;
 using std::vector;
+
+void log(string some_string) {
+    std::ofstream logfile("log.txt", std::ios_base::app);
+    if (!logfile) {
+        std::cerr << "Panic!" << std::endl;
+    }
+    logfile << some_string << std::endl;
+    logfile.close();
+}
 
 // DONE: An example of how to read data from the filesystem
 string LinuxParser::OperatingSystem() {
@@ -68,10 +78,56 @@ vector<int> LinuxParser::Pids() {
 }
 
 // TODO: Read and return the system memory utilization
-float LinuxParser::MemoryUtilization() { return 0.0; }
+float LinuxParser::MemoryUtilization() {  
+    string line;
+    std::ifstream stream(kProcDirectory + kMeminfoFilename);
+    if (stream.is_open()) {
+        string key, value;
+        float memtotal, memfree; 
+
+        std::getline(stream, line);
+        std::istringstream linestream1(line);
+        linestream1 >> key >> memtotal;
+        if (key != "MemTotal:") {
+            std::cout << "memtotal not found";
+        } else {
+            log("mem_total " + std::to_string(memtotal));
+        }
+
+        std::getline(stream, line);
+        std::istringstream linestream2(line);
+        linestream2 >> key >> memfree;
+        if (key != "MemFree:") {
+            std::cout << "memfree not found";
+        } else {
+            log("mem_free " + std::to_string(memfree));
+        }
+
+        return (memtotal-memfree)/memtotal;
+    }
+    return 0.0;
+}
 
 // TODO: Read and return the system uptime
-long LinuxParser::UpTime() { return 0; }
+long LinuxParser::UpTime() {
+    std::ifstream fstream(kProcDirectory + kUptimeFilename);
+    if (fstream.is_open()) {
+        string line;
+        if (std::getline(fstream, line)) {
+            std::istringstream line_stream(line);
+            float uptime, idle_time;
+            if (line_stream >> uptime >> idle_time) {
+                log("uptime" + to_string(uptime));
+                return static_cast<long>(uptime);
+            } else {
+                log("Could not read the two uptime related values");
+            }
+        }
+    } else {
+        log("Could not open uptime file");
+    }
+    return 0;
+}
 
 // TODO: Read and return the number of jiffies for the system
 long LinuxParser::Jiffies() { return 0; }
