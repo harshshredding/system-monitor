@@ -8,6 +8,10 @@
 #include "processor.h"
 #include "system.h"
 #include "linux_parser.h"
+#include "helper.h"
+#include <iostream>
+#include <filesystem>
+
 
 using std::set;
 using std::size_t;
@@ -20,23 +24,46 @@ You need to properly format the uptime. Refer to the comments mentioned in forma
 // TODO: Return the system's CPU
 Processor& System::Cpu() { return cpu_;}
 
+
+bool is_number(const std::string& s)
+{
+    std::string::const_iterator it = s.begin();
+    while (it != s.end() && std::isdigit(*it)) ++it;
+    return !s.empty() && it == s.end();
+}
+
+
 // TODO: Return a container composed of the system's processes
-vector<Process>& System::Processes() { return processes_; }
+vector<Process>& System::Processes() {
+    std::string path = "/proc"; // specify your path here
+   
+
+    for (const auto& entry: std::filesystem::directory_iterator(path)) {
+        if (entry.is_directory()) {
+            string folder_name = entry.path().filename().string();
+            if (is_number(folder_name)) {
+                log(folder_name);
+            }
+        }
+    }
+
+    return processes_; 
+}
 
 // TODO: Return the system's kernel identifier (string)
 std::string System::Kernel() { return LinuxParser::Kernel();}
 
 // TODO: Return the system's memory utilization
-float System::MemoryUtilization() { return LinuxParser::MemoryUtilization();}
+float System::MemoryUtilization() { return LinuxParser::MemoryUtilization(); }
 
 // TODO: Return the operating system name
-std::string System::OperatingSystem() { return LinuxParser::OperatingSystem();}
+std::string System::OperatingSystem() { return LinuxParser::OperatingSystem(); }
 
 // TODO: Return the number of processes actively running on the system
-int System::RunningProcesses() { return 0; }
+int System::RunningProcesses() { return LinuxParser::RunningProcesses(); }
 
 // TODO: Return the total number of processes on the system
-int System::TotalProcesses() { return 0; }
+int System::TotalProcesses() { return LinuxParser::TotalProcesses(); }
 
 // TODO: Return the number of seconds since the system started running
 long int System::UpTime() { 

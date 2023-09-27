@@ -6,20 +6,13 @@
 #include <iostream>
 
 #include "linux_parser.h"
+#include "helper.h"
 
 using std::stof;
 using std::string;
 using std::to_string;
 using std::vector;
 
-void log(string some_string) {
-    std::ofstream logfile("log.txt", std::ios_base::app);
-    if (!logfile) {
-        std::cerr << "Panic!" << std::endl;
-    }
-    logfile << some_string << std::endl;
-    logfile.close();
-}
 
 // DONE: An example of how to read data from the filesystem
 string LinuxParser::OperatingSystem() {
@@ -146,10 +139,46 @@ long LinuxParser::IdleJiffies() { return 0; }
 vector<string> LinuxParser::CpuUtilization() { return {}; }
 
 // TODO: Read and return the total number of processes
-int LinuxParser::TotalProcesses() { return 0; }
+int LinuxParser::TotalProcesses() { 
+    std::ifstream stat_file(kProcDirectory + kStatFilename);
+    string line;
+    if (stat_file.is_open()) {
+        while (std::getline(stat_file, line)) {
+            std::istringstream string_stream(line);
+            string key;
+            string value;
+            if (string_stream >> key >> value) {
+                if (key == "processes") {
+                    return std::stoi(value);
+                }
+            }
+        }
+    } else {
+        log("Could not open stat file");
+    }
+    return -1;
+}
 
 // TODO: Read and return the number of running processes
-int LinuxParser::RunningProcesses() { return 0; }
+int LinuxParser::RunningProcesses() { 
+    std::ifstream stat_file(kProcDirectory + kStatFilename);
+    string line;
+    if (stat_file.is_open()) {
+        while (std::getline(stat_file, line)) {
+            std::istringstream string_stream(line);
+            string key;
+            string value;
+            if (string_stream >> key >> value) {
+                if (key == "procs_running") {
+                    return std::stoi(value);
+                }
+            }
+        }
+    } else {
+        log("Could not open stat file");
+    }
+    return -1;
+ }
 
 // TODO: Read and return the command associated with a process
 // REMOVE: [[maybe_unused]] once you define the function
