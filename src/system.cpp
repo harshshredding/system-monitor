@@ -32,21 +32,30 @@ bool is_number(const std::string& s)
     return !s.empty() && it == s.end();
 }
 
-
-// TODO: Return a container composed of the system's processes
-vector<Process>& System::Processes() {
+vector<string> get_process_ids() {
     std::string path = "/proc"; // specify your path here
-   
-
+    std::vector<string> ret;
     for (const auto& entry: std::filesystem::directory_iterator(path)) {
         if (entry.is_directory()) {
             string folder_name = entry.path().filename().string();
             if (is_number(folder_name)) {
-                log(folder_name);
+                ret.push_back(folder_name);
             }
         }
     }
+    return ret;
+}
 
+// TODO: Return a container composed of the system's processes
+vector<Process>& System::Processes() {
+    processes_.clear();
+    vector<string> process_ids = get_process_ids();
+    for(auto process_id: process_ids) {
+        Process new_process;
+        new_process.set_pid(process_id);
+        processes_.push_back(new_process);
+    }
+    log("num_processes: " + std::to_string(processes_.size()));
     return processes_; 
 }
 
