@@ -3,6 +3,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <fstream>
 
 #include "process.h"
 
@@ -17,7 +18,17 @@ int Process::Pid() { return this->process_id; }
 float Process::CpuUtilization() { return 0; }
 
 // TODO: Return the command that generated this process
-string Process::Command() { return string(); }
+string Process::Command() {
+    std::string cmdline_file_path = "/proc/" + std::to_string(this->process_id) + "/cmdline";
+    std::ifstream file_stream(cmdline_file_path);
+    if (file_stream.is_open()) {
+        std::string cmd;
+        if (std::getline(file_stream, cmd)) {
+            return cmd;
+        }
+    }
+    return "ERROR";
+}
 
 // TODO: Return this process's memory utilization
 string Process::Ram() { return string(); }
