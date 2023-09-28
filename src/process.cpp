@@ -42,7 +42,9 @@ string Process::Ram() const {
             string value;
             if (string_stream >> key >> value) {
                 if (key == "VmSize:") {
-                    return value;
+                    int value_in_bytes = std::stoi(value);
+                    int value_in_megabytes = value_in_bytes/1000;
+                    return std::to_string(value_in_megabytes);
                 }
             }
         }
