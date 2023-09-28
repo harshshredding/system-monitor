@@ -52,8 +52,58 @@ string Process::Ram() const {
     return "0";
 }
 
+
+// TODO: Return this process's memory utilization
+string get_user_uuid(int pid) {
+    std::string status_file = "/proc/" + std::to_string(pid) + "/status";
+    std::ifstream file_stream(status_file);
+    if (file_stream.is_open()) {
+        std::string line;
+        while (std::getline(file_stream, line)) {
+            std::istringstream string_stream(line);
+            string key;
+            string value;
+            if (string_stream >> key >> value) {
+                if (key == "Uid:") {
+                    return value;
+                }
+            }
+        }
+    }
+    return "NOT AVAILABLE";
+}
+
+vector<string> split_string(string str, char delimiter) {
+    std::vector<string> ret;
+    std::istringstream string_stream(str);
+    string token;
+    while(getline(string_stream, token, delimiter)) {
+        ret.push_back(token);
+    }
+    return ret;
+}
+
+string get_username(string uuid) {
+    std::string passwd_file_path = "/etc/passwd";
+    std::ifstream file_stream(passwd_file_path);
+    if (file_stream.is_open()) {
+        std::string line;
+        while (std::getline(file_stream, line)) {
+            vector<string> tokens = split_string(line, ':');
+            string username = tokens[0];
+            if (tokens[2] == uuid) {
+                return username;
+            }
+        }
+    }
+    return "N/A";
+}
+
 // TODO: Return the user (name) that generated this process
-string Process::User() { return string(); }
+string Process::User() { 
+    string user_uuid = get_user_uuid(this->process_id);
+    return get_username(user_uuid);
+}
 
 // TODO: Return the age of this process (in seconds)
 long int Process::UpTime() { return 0; }
