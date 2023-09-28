@@ -57,6 +57,7 @@ vector<Process>& System::Processes() {
     }
     log("num_processes: " + std::to_string(processes_.size()));
     std::sort(processes_.begin(), processes_.end());
+    std::reverse(processes_.begin(), processes_.end());
     return processes_; 
 }
 
