@@ -31,7 +31,24 @@ string Process::Command() {
 }
 
 // TODO: Return this process's memory utilization
-string Process::Ram() { return string(); }
+string Process::Ram() const {
+    std::string status_file = "/proc/" + std::to_string(this->process_id) + "/status";
+    std::ifstream file_stream(status_file);
+    if (file_stream.is_open()) {
+        std::string line;
+        while (std::getline(file_stream, line)) {
+            std::istringstream string_stream(line);
+            string key;
+            string value;
+            if (string_stream >> key >> value) {
+                if (key == "VmSize:") {
+                    return value;
+                }
+            }
+        }
+    }
+    return "0";
+}
 
 // TODO: Return the user (name) that generated this process
 string Process::User() { return string(); }
@@ -41,7 +58,11 @@ long int Process::UpTime() { return 0; }
 
 // TODO: Overload the "less than" comparison operator for Process objects
 // REMOVE: [[maybe_unused]] once you define the function
-bool Process::operator<(Process const& a[[maybe_unused]]) const { return true; }
+bool Process::operator<(Process const& a) const {
+    int curr_ram = std::stoi(this->Ram());
+    int other_ram = std::stoi(a.Ram());
+    return curr_ram < other_ram;
+}
 
 void Process::set_pid(std::string pid) {
     this->process_id = std::stoi(pid);

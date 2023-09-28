@@ -56,6 +56,7 @@ vector<Process>& System::Processes() {
         processes_.push_back(new_process);
     }
     log("num_processes: " + std::to_string(processes_.size()));
+    std::sort(processes_.begin(), processes_.end());
     return processes_; 
 }
 
