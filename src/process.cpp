@@ -139,7 +139,25 @@ string Process::User() {
 }
 
 // TODO: Return the age of this process (in seconds)
-long int Process::UpTime() { return 0; }
+long int Process::UpTime() { 
+    std::string stat_file_path = "/proc/" + std::to_string(this->process_id) + "/stat";
+    std::ifstream file_stream(stat_file_path);
+    if (file_stream.is_open()) {
+        std::string line;
+        if (std::getline(file_stream, line)) {
+            vector<string> values = split_string(line, ' ');
+            long start_time = stol(values[21]);
+            long ticks_per_second = sysconf(_SC_CLK_TCK);
+            long uptime = LinuxParser::UpTime();
+            long process_age = uptime - (start_time/ticks_per_second);
+            /* int hours = process_age/3600; */
+            /* int minutes = (process_age%3600)/60; */
+            /* int seconds = process_age%60; */
+            return process_age;
+        }
+    }
+    return 0;
+}
 
 // TODO: Overload the "less than" comparison operator for Process objects
 // REMOVE: [[maybe_unused]] once you define the function
