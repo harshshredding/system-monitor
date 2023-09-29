@@ -167,6 +167,6 @@ bool Process::operator<(Process const& a) const {
     return curr_ram < other_ram;
 }
 
-void Process::set_pid(std::string pid) {
-    this->process_id = std::stoi(pid);
+void Process::set_pid(int pid) {
+    this->process_id = pid; 
 }
